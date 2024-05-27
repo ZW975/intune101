@@ -260,4 +260,4 @@ PushNotification-platform
  ### MHS（managed home screen）
  android dedicated在展台模式下侧拉多次出现log
 
-> Written with [StackEdit中文版](https://stackedit.cn/).
+github原创内容
