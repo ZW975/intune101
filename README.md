@@ -49,7 +49,7 @@ registry dump里搜索policy manager的关键词，找到这些policy的路径�
 
 如果说是在**Apps**这个阶段失败的话，说明我们在intune上部署的app要么下载不成功，要么安装不成功。我们得先去确认具体是由哪一个app导致的失败，这个我们可以去intune portal上看到一些app失败的信息。也可以看看是否有LOB和win32的app在一起推，因为在autopilot阶段一起推的话他们installer的组件会起冲突，也可能会导致一个失败。用shift+f10唤出命令行，用`mdmdiagnosticstool. exe -area AutoPilot -cab %temp%|%COMPUTERNAME%.cab` 收cab包，然后跑一个`Get-AutopilotDiagnostics cab`的命令去获取一条autopilot的时间线，这里我们也可以看到具体是在哪一个app上失败的以及失败的时间。总之确认好是哪个app后就要去看对应的信息
 
-**LOB app**，首先确定是安装问题还是下载问题
+**LOB app**，首先确定是安装问题还是下载问题 我真帅
 
  - 下载问题
  在路径`C：\Windows\System32\config\systemprofile\AppData\Local\mdm`下没有找到下载的msi安装包可以判定为下载失败
