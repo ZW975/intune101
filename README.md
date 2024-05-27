@@ -9,16 +9,16 @@ ADE也是可以收company portal log的，但假设你选的认证方式是moder
 
 ## 对于安卓设备
 
-像Device Administrator的话首先要确保device platform restriction创建了一条block掉AE的restriction，并且把这条的优先级调到最高，否则在同等条件下，AE的优先级永远高于DA，只有在将AEblock掉或者因为GMS的原因AE不可用的时候，DA才会变成首先注册到intune 的方式。如果DA出现问题也是可以去通过company portal的incident id来收log的。
+Device Administration这个enroll方式在默认情况下是关闭的。在打开后如果需要使用，首先要确保device platform restriction创建了一条block掉AE的restriction，并且把这条的优先级调到最高，否则在同等条件下，AE的优先级永远高于DA，只有在将AEblock掉或者因为GMS的原因AE不可用的时候，DA才会变成首先注册到intune 的方式。如果DA出现问题也是可以去通过company portal的incident id来收log的。
 
-android BYOD设备不需要恢复出厂设置，可以直接下载company porta登录intune账号，然后下载配置文件，这个注册出现了问题也可以收company portal log。
-如果说是AE的一些设备，像dedicated，fully managed和corporate owned，这些没有company portal这个应用，不过他们可以通过Microsoft Intune这个应用来收log，从这里收上来的log和从company portal上收上来的log没有什么区别。如果说是在扫QR code的阶段出现问题话，就得搜debug log，这个和console log的形式差不多，也会用到一个USB，然后会需要在settings里的developer options里边复现问题然后收report再发到邮箱里。
-除此之外对于dedicated设备，如果是在展台模式下，在manage home screen中的展示的应用，首先需要添加到google 商店中，并且要新建一个android平台的device configuration，选择manage home screen需要展示的app，可以调节这些app 的layout。
+android BYOD设备不需要恢复出厂设置，可以直接下载company portal登录intune账号，然后下载配置文件，这个注册出现了问题也可以收company portal log。
+如果说是AE的一些设备，像dedicated，fully managed和corporate owned，这些没有company portal这个应用，不过他们可以通过Microsoft Intune这个应用来收log，从这里收上来的log和从company portal上收上来的log没有什么区别。如果说是在扫QR code的阶段出现问题话，就得搜debug log，可以用google官方的console工具叫android SDK，这个和console log的形式差不多，也会用到一个USB，然后会需要在settings里的developer options里边复现问题然后收report再发到邮箱里。
+除此之外对于dedicated设备，如果是在展台模式下，在manage home screen中的展示的应用，首先需要从managed google play商店推到tenant的应用池子里，并且要新建一个android平台的device configuration，选择manage home screen需要展示的app，可以调节这些app 的layout。但是个别功能需要三方软件合作完成，定制化功能比较有限。
 manage home screen出现了问题，那么侧拉多次会出现一个弹窗，可以收MHS的log。
 
 ## 对于MAC设备
 
-MAC是不能直接在store里下company portal的，它可以通过官方的一个网页下载，这个网页链接在Microsoft的文档里有给到https://go.microsoft.com/fwlink/?linkid=853070。然后下载下来之后再去收company portal log就行了。
+MAC是不能直接在store里下company portal的，它可以通过官方的一个网页下载，这个网页链接在Microsoft的文档里有给到`https://go.microsoft.com/fwlink/?linkid=853070`。然后下载下来之后再去收company portal log就行了。
 
 # windows BYOD注册
 首先确定windows版本，crtl+R winver
