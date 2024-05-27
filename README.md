@@ -18,7 +18,7 @@ manage home screen出现了问题，那么侧拉多次会出现一个弹窗，�
 
 ## 对于MAC设备
 
-MAC是不能直接在store里下company portal的，它可以通过官方的一个网页下载，这个网页链接在Microsoft的文档里有给到`https://go.microsoft.com/fwlink/?linkid=853070`。然后下载下来之后再去收company portal log就行了。
+MAC是不能直接在store里下company portal的，它可以通过官方的一个网页下载，这个网页链接在Microsoft的文档里有给到[Download Link](https://go.microsoft.com/fwlink/?linkid=853070)。然后下载下来之后再去收company portal log就行了。
 
 # windows BYOD注册
 首先确定windows版本，crtl+R winver
