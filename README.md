@@ -37,6 +37,8 @@ Windows10，1511及之前版本的在设置中，account-add a work or school ac
 如果说是在**join organization's network**这里失败的话，说明设备没法join到AAD，这里也是针对self-deploying和pre-provisioned的设备，标准的user-driven在进入到ESP这个界面时就已经完成了这个操作了。这里失败的话就得去Azure portal上看Device settings，里面有一个Users may join devices to Microsoft Entra，这里是否设置成了all，设置成some的话这台设备是否有包含在里面。另外可以看maximum number of devices per user （device limit restriction），这里是否超过了限制，一般来说recommend的是20台，不过用户也可以自定义到1-unlimited。
 
 如果说是在**register device for mobile management**这里失败的话，说明设备没法enroll到intune，这里就可以去通过azure或者intune portal上看是否MDM user scope是设置成all的，如果设置成some了的话，这台设备是否包含在内。另外还可以在intune portal上看device platform restriction,看是否block了MDM或者设置了version要求。同时可以看看device limit restriction是否超过限制了，非DEM的情况下，一个standard user最多是可以enroll15台。另外还可以看看这些都检查完之后，可以让客户再去敲一个MDMDiagnosticstool -area Autopilot -cab的命令去收集log，收到之后我们在cab包里主要看的是provier-admin的event log，打开之后看里面是否有event id 75或76，失败的话我们更多的是找76，找到了的话去detail page找error code或者error message，我们就能进一步去看看是什么原因。如果这两个log我们都没看到的话，那说明这个注册可能根本就没触发，我们可就需要进一步跟客户去确认是否是网络或者设备层面的原因。网络的话可以看用户在相同的网络下其他设备是否有注册成功的，另外用户换一个网能否解决问题。如果还是不成功的话，可以尝试用用netsh trace来检测网络活动。设备层面的话得达到autopilot的prerequisites，比如说如果用户的设备是home edition的话那就是没有办法做autopilot的，只能register。
+-entra mobility页面截图，autopilot配置文件截图，收cab包（MDMDiagnosticTool指令）：等待展开
+-
 
 ## 在device setup阶段失败
 
