@@ -1,0 +1,94 @@
+Auto-enroll大场景：
+第一封邮件：具体是什么注册方式？（GPO/autopilot/BYOD/copilot）多少台设备注册失败了多少台？确认一下这些设备被MDM user scope覆盖了。
+ 
+GPO注册：
+首先确认hybrid状态，在cmd中输入指令dsregcmd/status，AzureADJoined，DomainJoined，AzureADprt(用来验证登录的)等应该显示yes
+确认组策略状态，gpupdate /force强制更新组策略，然后检查状态 -gpresult /v /scope:computer
+检查group policy的下发状态，服务器的task schedule里，找到Microsoft>Windows>EnterpriseMgmt
+Troubleshooting - 如果检查状态后全线不好，都是错误信息，那回到event viewer找到报错的event，根据error code进行排错，主要关注75，76的event找报错信息
+排除autoenroll方面等问题，找其他的组协作一下
+ 
+Autopilot大场景：
+第一封邮件：配置截图 - 确认user-driver/self-deploy；失败阶段截图 - 如果没有那打开esp复现；
+ 
+Autopilot整个都进不去OOBE
+在失败的这台设备上用Powershell: wmic bios get serialnumber提取设备的序列号 -> 去autopilot - device（用前面提取出来的设备序列号去定位设备）- device详情里可以看到分配的deployment profile
+收cab包 - MDMDiagnosticsTool判断出错出在哪里，看autopilot的json文件里面的内容 - 有没有下发到设备上
+确认Windows版本，提取device hash，重新测试
+ 
+Autopilot account setup阶段apps阶段失败
+第一封邮件：MDM diagnostic tool - cab包，esp截图，autopilot deployment截图（timeout？）
+GetautopilotDiagnostics看时间先看下失败的是哪个app，ime log看app的类型和失败阶段
+Store app？Winget - 失败了可能是winget有问题（app里看到package identifier），也可以看一下ime log
+Win32? 配置告诉我们+应用安装包分享给我们
+在app的install behavior里确认user还是system user的话以前登陆在这个设备上的账号用powershell跑安装的指令试一下安装指令 system的话用PSTool跑指令 一定先测带静默命令的 验证有问题再取消静默试一下
+如果实际安装路径和detection rule路径不同 - 建议根据实际情况改detection rule，具体可以参考一下产品的官方文档
+ 
+Autopilot device setup阶段security policies（configuration profile）阶段失败
+esp报错的截图页面，cab包=MDMDiagnostic.html+provider admin，最近有没有修改过什么配置（确认场景）
+先去portal确认出错的policy，然后查包(两者都可)，看event view和html的report去确认config是不是deploy到设备上了，确认各类前置和非前置条件，适用user?device，自己复现一下，确认配置的可用性
+还是失败，确认对应的功能是什么，让功能组来协助为什么还会有相关问题。
+ 
+复现+文档搜索（检索是否该配置在该场景合理） - 确认方面 - 给出解决方案
+cp会告诉我前提条件给的不太好
+ 
+Autopilot device preparation阶段register阶段失败
+1. autopilot配置文件截图，收cab包（MDMDiagnosticTool指令），esp失败的截图（error code）：等待展开
+2. 确认截图设置，确认user-driven还是self-deployment(确认auto-pilot类型来判断是否需要tpm)，cab包：provider-admin event-id 75/76报错的error code
+3. 如果error code属无效信息，继续确认场景 - 多少设备enroll，失败了多少台，设备有没有什么不同（设备是不是一样的设备），是否是一样的网络环境，设备的系统版本
+ 
+App configuration + App protection
+第一封邮件：手动sign out，sign in进行手动check in。app configuration的property设置（managed app还是managed device，客户的预设场景和配置场景（注意自测）），设备是什么平台（ios还是安卓）
+如果ios：是否设置了正确的UPN
+自测设置内容能否生效 - 如果不能，找产品确认，同时自测，收一下自己的MAM log，检索关键词app configuration
+如果自测MAM log正常：建议客户确认配置是否正确
+自测MAM log不正常：联系客户要MAM包进行排错
+ 
+AC/AP具体场景：想要传输企业文件只到微信
+第一封邮件：要ap策略的截图，确认data transfer设置是只能向managed app内发送data
+找微信官方要exempt的value填在exempt app的选项里
+如果无效：
+首先尝试数据源的app sign out再sign in触发check in同步策略
+如果依然无效，收MAM log：company portal log或者managed browser/edge：about:intunehelp > get started > 共享日志/向microsoft发送日志（incident id)
+ 
+MAM不工作 - 最近有没有配app protection-configuration的policy，具体影响了哪些app，有什么表现
+ 
+Comanagement
+注册：
+第一封邮件确认configuration manager版本，（1315 liscence里的）intune license有没有
+去设备端确认configuration manager properties，configuration tab下是否有autoenroll的policy
+如果没有的话让客户去查一下去console确认一下workload有没有分配对（all/pilot），分配完了再去client查一下client端configuration manager properties的configuration tab有没有auto enroll的policy(是不是compliant)
+有但是没生效先用evaluate重新触发策略，或者让用户重启一下尝试重启触发 - 是为了让设备被enroll
+如果（有）non-compliant看event viewer的error code，view-report>sccm的co-managementhandler.log，也可以看provider-admin，总之看报错消息和设备上应用到了哪些workload
+没有收到config和app：
+先去client端检查策略情况，
+如果没有策略：
+确认是从哪里部署的应用和策略，再去console看workload，确认分配情况和app从哪里部署的
+如果全部都是intune：
+如果有去检查相关的app的部署的策略有没有生效，（configuration manager properties，configuration tab）（可能是一个policy也可能是很多policy）首先尝试重启或evaluate这个policy来激活这条policy，如果没有用，去view report检查具体的报错error code，并且检查Co-managementhandler log里也会有（revision）number去查策略id，要去确认workloadflags目前应用到的workload（先去看general里面那边去比对一下comanagement capability的workload的值） 还可以去intune portal打开这台设备可以看到intune managed workload 三种方式 并不是三个值互相比对 只要有这个值就好了 看设备上应用到了哪些workload
+如果client上没有这个workload - 去console看分配的问题
+ 
+PowerShell script deployment
+一个script应用在多台设备上可以直接在script name>device status里看哪些设备success哪些fail，这是在portal端可以看到的
+设备端检查设置是否已经完成，例如推的是test里的密码永不过期，去计算机管理>本地用户和组>用户里看是否生效
+排错可以看IME log文件夹agentExcecuter看script运行记录（是否跑了哪行报错，用policy id，在portal script页面的url里）以及IME log看运行情况，还可以去注册表HKLM\software\microsoft\intunemanagementextension\policies\user guid\policy id去看状态，其中有error code可以看。不能排除script就写错了的情况。
+ 
+Conditional access
+出现报错之后点更多详细信息，复制correlation id。回到intune>endpoint security>conditional access>sign-in logs。点击filter，选中correlation id并粘贴前面复制的ID。点进记录，直接进入conditional access界面，点击failure项，看看设备是否complaint，是不是属于我们的scope。如果是的话，去policies进行具体的修改。
+ 
+Certificates
+intune通过connector找证书下发机构验证信息下发证书
+常用场景就是验证wifi和验证VPN
+ 
+看NDES log，前面流程说到device会下发几个指令，get CA cap, get CA cert, pki operation，验证完CA cap和CA certificate，才会把request递交给intune certificate connector，C:\inetpub\logs\LogFiles\W3SVC1\u_exlog(check Device->NDES connection) 如果能在IIS log里看到get CA cap, get CA cert，post并且值都是200，就可以看CA connector的日志了
+看application log，PPT P32页，除了上面的log，还可以看Event Log>Application log-NetworkdeviceenrollmentService，筛选出NDES相关的event，看下NDES相关是否有报错
+最后看connector相关的日志，Event viewer>Application&EventService >Microsoft>Intune>CertificateConnector，要admin和operational两份
+ 
+移动设备enroll排错模板
+第一封邮件：多少台设备进行哪种类型的注册，失败了多少台？设备的系统版本是什么？两个restriction设置？各类token是否生效中（apple MDM push certificate，android dedicated，ADE：enrollment program token last sync time）？失败界面的截图/照片（报错信息）；检查一下本地的配置文件（如果iOS在配置文件下载 后失败）
+如果下载前中失败，建议换一个网络环境再次测试
+收log，company portal log/intune log（company owned, fully managed, dedicated）/console log(xcode)/android SDK(usb），要incident id去powerlift查，关键词WPJ（workplace join)和enroll
+ 
+kusto看的是intune portal和设备之间的连接的
+Event Viewer > Applications and Service Logs > Microsoft > Windows > Device Management - Enterprise - Diagnostics - Provider > Admin
+不要混用user和device group - require建议只上device，available建议上user
