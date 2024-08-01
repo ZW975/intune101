@@ -55,7 +55,7 @@ MAM不工作 - 最近有没有配app protection-configuration的policy，具体�
  
 Comanagement
 注册：
-第一封邮件确认configuration manager版本，（1315 liscence里的）intune license有没有
+第一封邮件确认configuration manager版本，（E3 E5 liscence里的）intune license有没有
 去设备端确认configuration manager properties，configuration tab下是否有autoenroll的policy
 如果没有的话让客户去查一下去console确认一下workload有没有分配对（all/pilot），分配完了再去client查一下client端configuration manager properties的configuration tab有没有auto enroll的policy(是不是compliant)
 有但是没生效先用evaluate重新触发策略，或者让用户重启一下尝试重启触发 - 是为了让设备被enroll
